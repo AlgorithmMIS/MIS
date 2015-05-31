@@ -1,40 +1,33 @@
-package greedyandmaximal;
+//package greedyandmaximal;
 
 import java.util.HashSet;
 
 public class Greedy {
 	static HashSet<Integer> maximalSet;
 	static Graph graph;
-	public static void main(String[] args){
-		graph=new Graph();
-		maximalSet=new HashSet<Integer>();
-		HashSet<Integer> temp=new HashSet<Integer>();
-		int max=-1;
-		for(int start=0;start<graph.adList.size()-1;start++){
+	static HashSet<Integer> temp;
+
+	public static void handle(int i) {
+		temp.clear();
+		temp.addAll(maximalSet);
+		temp.retainAll(graph.adList.get(i).list);
+		if (temp.isEmpty()) {
+			maximalSet.add(graph.adList.get(i).vertex);
+		}
+	}
+
+	public static void main(String[] args) {
+		graph = new Graph();
+		maximalSet = new HashSet<Integer>();
+		temp = new HashSet<Integer>();
+		int max = -1;
+		for (int start = 0; start < graph.adList.size() / 3; start++) {
 			maximalSet.add(start);
-			for(int i=0;i<graph.adList.size();i++){
-				if(graph.adList.get(i).vertex!=start){
-					temp.clear();
-					temp.addAll(maximalSet);
-					temp.retainAll(graph.adList.get(i).list);
-					if(temp.size()==0){
-
-						maximalSet.add(graph.adList.get(i).vertex);
-					
-					}
-				}
-			}
-
-			if(max<0){
-				max=maximalSet.size();
-			}else{
-				if(maximalSet.size()>max){
-					max=maximalSet.size();
-				}
-			}
+			for (int happy = 0; happy < graph.adList.size(); happy++)
+				handle(happy);
+			max = max > maximalSet.size() ? max : maximalSet.size();
 			maximalSet.clear();
 		}
-
 		System.out.println(max);
 	}
 }
