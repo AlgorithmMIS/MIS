@@ -1,4 +1,4 @@
-
+package backtrack;
 public class BackTrack {
 	static Graph graph;
 	static int bestNumber=0;
@@ -22,6 +22,7 @@ public class BackTrack {
 		if(currentSet.size()+graph.numberOfVertex-vertex>bestNumber){
 			backTrack(vertex+1,currentSet.clone());
 		}
+		
 	}
 
 }
