@@ -13,13 +13,14 @@ public class Greedy {
 		for(int start=0;start<graph.adList.size()-1;start++){
 			maximalSet.add(start);
 			for(int i=0;i<graph.adList.size();i++){
-				if(i!=start){
+				if(graph.adList.get(i).vertex!=start){
 					temp.clear();
 					temp.addAll(maximalSet);
 					temp.retainAll(graph.adList.get(i).list);
 					if(temp.size()==0){
 
 						maximalSet.add(graph.adList.get(i).vertex);
+					
 					}
 				}
 			}
