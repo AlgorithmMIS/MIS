@@ -1,4 +1,4 @@
-//package greedyandmaximal;
+package greedyandmaximal;
 
 import java.util.HashSet;
 
