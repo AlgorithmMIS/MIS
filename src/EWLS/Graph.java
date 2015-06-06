@@ -19,7 +19,7 @@ public class Graph {
 	public Graph() {
 		System.out.println("Hello");
 		this.adTable = new ArrayList< HashSet<edge>>();
-		File file = new File("src/frb59-26-5.mis");
+		File file = new File("src/frb30-15-1.mis");
 		String line = null;
 		edge temp;
 		String[] strs;
