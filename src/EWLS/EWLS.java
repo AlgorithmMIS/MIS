@@ -13,7 +13,7 @@ import java.util.Random;
 public class EWLS {
 	static HashSet<Integer> CurrentVertexCover;// c
 	static HashSet<Integer> RemainVertex;// 剩余的点
-	static HashSet<Integer> VertexCover;// c'
+	static HashSet<Integer> VertexCover;//已经找到的最优解
 	static edges LIST;// L
 	//static edges UncheckedList;// UL
 	static Graph graph;
@@ -22,16 +22,16 @@ public class EWLS {
 	static int step = 0;
 	static int ub;
 	static final int delta = 3;
-	static final int finalstep = 2;
+	static final int finalstep = 2000;
 	static HashMap<Integer, Integer> dscores = new HashMap<Integer, Integer>();
 	static List<Map.Entry<Integer, Integer>> dscores_value;
 
 	public static void addAnVetex(int v)// 单纯的向C中加一个点。
 	{
-		ArrayList<edge> temp = new ArrayList<edge>(graph.adTable.get(v));
+		
 		CurrentVertexCover.add(v);
 		RemainVertex.remove(v);
-		LIST.remove(temp);
+		LIST.remove(graph.adTable.get(v));
 		//UncheckedList.remove(temp);
 	}
 
@@ -41,11 +41,15 @@ public class EWLS {
 		RemainVertex.add(v);
 		for (edge t : temp) {
 			if (RemainVertex.contains(t.x) && RemainVertex.contains(t.y)) {
-				LIST.addFirst(t);// Add first!
+				if(CurrentVertexCover.contains(t.x)||CurrentVertexCover.contains(t.y)){
+					//do nothing
+				}else
+					LIST.addFirst(t);// Add first!
 				//UncheckedList.add(t);
 			}
 
 		}
+		System.out.println("after del "+LIST.isEmpty());
 	}
 
 	public static void sort() {// 将dscores_value进行排序
@@ -155,6 +159,7 @@ public class EWLS {
 				}
 			}
 		}
+		System.out.println("choose failed");
 		return new edge(-1,-1);
 	}
 
@@ -180,16 +185,17 @@ public class EWLS {
 			if (RemainVertex.contains(t.getKey()))
 				temp_dscore.put(t.getKey(), t.getValue());
 		}// 构造只属于剩余点的dscores的map。
-		
+		edges l=new edges();
+		l.addAll(LIST);
 		for (Integer t : temp_dscore.keySet()) {
 			ArrayList<edge> temp = new ArrayList<edge>(graph.adTable.get(t));
 			Cplus.add(t);
-			RemainVertex.remove(t);
+			//RemainVertex.remove(t);
 			for (edge myedge : temp) {
-				LIST.remove(myedge);
 				
+				l.remove(myedge);
 			}
-			if (LIST.isEmpty())
+			if (l.isEmpty())
 				break;
 		}
 		return Cplus;
@@ -216,25 +222,29 @@ public class EWLS {
 				break;
 			}
 		}
-		
+
 		while (step ++ < finalstep) {
-			edge swapvetexs = ChooseSwapPair();
-			//System.out.println("choose:" + swapvetexs.x + " " + swapvetexs.y);
-			if (!(swapvetexs.x == -1 && swapvetexs.y == -1)) {
-				delAnVetex(swapvetexs.x);
-				addAnVetex(swapvetexs.y);
-			}// 寻找可以交换的对
-			else {
-				for (edge t : LIST.getEdges()) {
-					t.weight+=1;// 对应的权重加1
-				}
-				
-				swapvetexs = Random();
-				delAnVetex(swapvetexs.x);
-				addAnVetex(swapvetexs.y);
-			}// 把随机找出来的交换了
-			tabuAdd = swapvetexs.x;
-			tabuRemove = swapvetexs.y;
+			if(!LIST.isEmpty()){
+				edge swapvetexs = ChooseSwapPair();
+				//System.out.println("choose:" + swapvetexs.x + " " + swapvetexs.y);
+				if (!(swapvetexs.x == -1 && swapvetexs.y == -1)) {
+					delAnVetex(swapvetexs.x);
+					addAnVetex(swapvetexs.y);
+				}// 寻找可以交换的对
+				else {
+					for (edge t : LIST.getEdges()) {
+						t.weight+=1;// 对应的权重加1
+					}
+
+					swapvetexs = Random();
+					delAnVetex(swapvetexs.x);
+					addAnVetex(swapvetexs.y);
+
+				}// 把随机找出来的交换了
+
+				tabuAdd = swapvetexs.x;
+				tabuRemove = swapvetexs.y;
+			}
 			if (CurrentVertexCover.size() + LIST.size() < ub) {
 				ub = CurrentVertexCover.size() + LIST.size();
 				if (LIST.isEmpty()) {
@@ -252,12 +262,24 @@ public class EWLS {
 				if (CurrentVertexCover.size() == ub - delta)
 					break;
 				if (CurrentVertexCover.contains(temp.getKey())) {
+					
 					delAnVetex(temp.getKey());
 				}
 			}
+
 			System.out.println(VertexCover.size());
 		}
 		System.out.println(VertexCover.size());
+	}
+	static private boolean checkVertexCover(HashSet<Integer> cover){
+		edges coverEdges=new edges();
+		for(Integer i:cover){
+			coverEdges.addAll(graph.adTable.get(i));
+		}
+		System.err.println("cover edges"+coverEdges.size()+" total"+graph.oriedges.size());
+		if(coverEdges.size()==(graph.oriedges.size()))
+			return true;
+		return false;
 	}
 }
 

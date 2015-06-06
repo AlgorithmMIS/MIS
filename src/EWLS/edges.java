@@ -14,7 +14,19 @@ public class edges {
 	public edges(edges a) {
 		this.myedges = new LinkedList<edge>(a.myedges);
 	}
-
+	
+	public void addAll(HashSet<edge> l){
+		for(edge e:l){
+			if(!myedges.contains(e))
+				myedges.add(e);
+		}
+	}
+	public void addAll(edges l){
+		for(edge e:l.myedges){
+			if(!this.myedges.contains(e))
+				this.myedges.add(e);
+		}
+	}
 	public void add(edge e) {
 		if (!myedges.contains(e))
 			myedges.add(e);
@@ -24,7 +36,10 @@ public class edges {
 		return (myedges);//needn't return a clone
 	}
 
-	public void remove(edge e) {
+	public void remove(HashSet<edge> hashSet) {
+		myedges.removeAll(hashSet);
+	}
+	public void remove(edge e){
 		myedges.remove(e);
 	}
 	public void remove(ArrayList<edge> a){
@@ -59,6 +74,7 @@ public class edges {
 
 	public void addFirst(edge t) {
 		// TODO Auto-generated method stub
-		this.myedges.addFirst(t);
+		if(!myedges.contains(t))
+			this.myedges.addFirst(t);
 	}
 }
