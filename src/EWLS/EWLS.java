@@ -110,12 +110,13 @@ public class EWLS {
 		RemainVertex = new HashSet<Integer>(graph.orivs);
 		LIST = new edges(graph.oriedges);
 		CurrentVertexCover = new HashSet<Integer>();
-		update_dscores();
+	
 		for (Entry<Integer, Integer> tmp : dscores_value) {
 			addAnVetex(tmp.getKey());
 			if (LIST.isEmpty()) {
 				VertexCover = new HashSet<Integer>(CurrentVertexCover);// 初始化C‘
 				ub = CurrentVertexCover.size();// 初始化开始时候的界ub
+					update_dscores();
 				break;
 			}
 		}
