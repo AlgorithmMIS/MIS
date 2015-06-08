@@ -12,7 +12,7 @@ typedef struct pair{
 }_pair;
 int v_n;
 int e_n;
-#define VERTEXNUM 450
+#define VERTEXNUM 4000
 #define FINAL_STEP 200000
 int step=0;
 int tabuAdd=-1;
@@ -24,14 +24,13 @@ int list_size=0;
 typedef struct ed_list{
 	int x,y;
 	struct ed_list *next;
-}edges;//store all the edges
+}edges;
 co_neibor c_neib[VERTEXNUM];
 int **e_w;
 int inc[VERTEXNUM]={0};
 int outofc[VERTEXNUM];
 int dscore[VERTEXNUM]={0};
 FILE *file;
-//edges *first=NULL,*next,*tmp;
 edges *LIST=NULL,*lnext=NULL;
 void readfile();
 void initial();
@@ -43,7 +42,7 @@ void add(int v);
 void remove_vetex(int v);
 void readfile()
 {
-	int i,j,tpa,tpb;
+	int i,j,tpa,tpb,oldsize;
 	char a[3],b[5];
 	e_w=(int **)malloc(sizeof(int*)*VERTEXNUM);
 	for(i=0;i<VERTEXNUM;i++)
@@ -55,37 +54,17 @@ void readfile()
 	for(i=0;i<VERTEXNUM;i++)
 	{
 		c_neib[i].degree=0;
-		c_neib[i].t_size=300;
-		c_neib[i].array=(int *)malloc(sizeof(int)*300);
+		c_neib[i].array=(int *)malloc(sizeof(int)*VERTEXNUM);
 	}
 	if((file=fopen("frb.mis","r"))==NULL)
 		printf("wrong\n");
 	fscanf(file,"%s%s%d%d",a,b,&v_n,&e_n);
-	//printf("%d,%d\n",v_n,e_n);
 	for(i=0;i<e_n;i++)
 	{
 		fscanf(file,"%s%d%d",a,&tpa,&tpb);
 		tpa--;tpb--;
-		if(c_neib[tpa].degree+1==c_neib[tpa].t_size)
-		{
-			c_neib[tpa].array=(int*)realloc(c_neib[tpa].array,c_neib[tpa].t_size*2);
-			c_neib[tpa].t_size*=2;
-			c_neib[tpa].array[c_neib[tpa].degree++]=tpb;
-		}
-		else
-		{
-			c_neib[tpa].array[c_neib[tpa].degree++]=tpb;
-		}
-		if(c_neib[tpb].degree+1==c_neib[tpb].t_size)
-		{
-			c_neib[tpb].array=(int*)realloc(c_neib[tpb].array,c_neib[tpb].t_size*2);
-			c_neib[tpb].t_size*=2;
-			c_neib[tpb].array[c_neib[tpb].degree++]=tpa;
-		}
-		else
-		{
-			c_neib[tpb].array[c_neib[tpb].degree++]=tpa;
-		}
+		c_neib[tpa].array[c_neib[tpa].degree++]=tpb;
+		c_neib[tpb].array[c_neib[tpb].degree++]=tpa;
 	}
 }
 void initial()
@@ -125,7 +104,6 @@ void initial()
 			w[c_neib[maxv].array[j]]--;
 		}	
 	}
-	//initial dscore array.
 	for(i=0;i<v_n;i++)
 	{
 		for(j=0;j<c_neib[i].degree;j++)
