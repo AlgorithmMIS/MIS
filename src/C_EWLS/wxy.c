@@ -1,10 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include<errno.h>
 #include<time.h>
 typedef struct c_neib{
 	int degree;
-	int t_size;
 	int *array;
 }co_neibor;
 typedef struct pair{
@@ -12,8 +10,11 @@ typedef struct pair{
 }_pair;
 int v_n;
 int e_n;
+time_t timer;
+struct tm *timeinfo;
 #define VERTEXNUM 4000
-#define FINAL_STEP 200000
+#define FILENAME "frb.mis"
+#define FINAL_STEP 90000000
 int step=0;
 int tabuAdd=-1;
 int taburemove_vetex=-1;
@@ -28,6 +29,8 @@ typedef struct ed_list{
 co_neibor c_neib[VERTEXNUM];
 int **e_w;
 int inc[VERTEXNUM]={0};
+int incplus[VERTEXNUM]={0};
+int cplus_n=0;
 int outofc[VERTEXNUM];
 int dscore[VERTEXNUM]={0};
 FILE *file;
@@ -36,7 +39,7 @@ void readfile();
 void initial();
 int compute_score(int inc,int outc);
 _pair chooseSwapPair();
-_pair randomSwapPair();
+_pair randomomSwapPair();
 void removeDelta();
 void add(int v);
 void remove_vetex(int v);
@@ -56,7 +59,7 @@ void readfile()
 		c_neib[i].degree=0;
 		c_neib[i].array=(int *)malloc(sizeof(int)*VERTEXNUM);
 	}
-	if((file=fopen("frb.mis","r"))==NULL)
+	if((file=fopen(FILENAME,"r"))==NULL)
 		printf("wrong\n");
 	fscanf(file,"%s%s%d%d",a,b,&v_n,&e_n);
 	for(i=0;i<e_n;i++)
@@ -69,7 +72,7 @@ void readfile()
 }
 void initial()
 {
-	int i=0,j=0;
+	int i=0,j=0,a,b;
 	int w[VERTEXNUM]={0};
 	int remain[VERTEXNUM];
 	int remain_size=0;
@@ -121,11 +124,13 @@ void initial()
 	for(i=0;i<remain_size;i++)
 		for(j=0;j<remain_size;j++)
 		{
-			if(e_w[i][j]>0)
+			a=remain[i];
+			b=remain[j];
+			if(e_w[a][b]>0)
 			{
 				tmp=(edges*)malloc(sizeof(edges));
-				tmp->x=i>j?j:i;
-				tmp->y=i>j?i:j;
+				tmp->x=a>b?b:a;
+				tmp->y=a>b?a:b;
 				tmp->next=NULL;
 				if(LIST==NULL)
 				{
@@ -147,13 +152,12 @@ int compute_score(int inc,int outc)
 }
 _pair chooseSwapPair()
 {
-	srand(time(NULL));
 	edges *tmp;
 	_pair result;
 	int r,j,u;
 	for(tmp=LIST;tmp!=NULL;tmp=tmp->next)
 	{
-		r=rand()%v_n;
+		r=rand()%(v_n);
 		for(j=0;j<v_n;j++)
 		{
 			u=(j+r)%v_n;
@@ -179,17 +183,16 @@ _pair chooseSwapPair()
 	result.y=-1;
 	return result;
 }
-_pair randomSwapPair()
+_pair randomomSwapPair()
 {
 	_pair result;
 	int x,i;
 	int index;
 	edges *tmp=LIST;
-	srand(time(NULL));
 	do
-	x=rand()%v_n;
+	x=rand()%(v_n);
 	while(!inc[x]);
-	index=rand()%list_size;
+	index=rand()%(list_size);
 	for(i=0;i<index;i++)
 	{
 		tmp=tmp->next;
@@ -206,7 +209,7 @@ _pair randomSwapPair()
 }
 void removeDelta()
 {
-	int max=-9999999;
+	int max=-999999999;
 	int maxv=-1;
 	int i;
 	for(i=0;i<v_n;i++)
@@ -283,8 +286,12 @@ void remove_vetex(int v)
 }
 int main()
 {
-	int i;
+	int i,j=0;
 	_pair swapair;
+	srand(time(NULL));
+	time(&timer);
+	timeinfo=localtime(&timer);
+	printf("step:%d,time:%d:%d:%d,uinc_n:%d\n",step,timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,uinc_n );
 	readfile();
 	initial();
 	printf("after initial,ud=%d,uinc_n=%d\n",ub,uinc_n);
@@ -304,21 +311,35 @@ int main()
 					if(!inc[lnext->y])
 						dscore[lnext->x]++;
 				}
-				swapair=randomSwapPair();
+				swapair=randomomSwapPair();
 			}
 			remove_vetex(swapair.x);
 			add(swapair.y);
 			tabuAdd=swapair.x;
 			taburemove_vetex=swapair.y;
 		}
+	//	printf("list_size:%d\n",list_size);
 		if(inc_n+list_size<ub)
 		{
+			//printf("come in\n");
 			ub=inc_n+list_size;
 			if(list_size==0)
-				printf("uinc_n size:%d\n",uinc_n);
+			{
+				time(&timer);
+				timeinfo=localtime(&timer);
+				printf("step:%d,time:%d:%d:%d,uinc_n:%d\n",step,timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,uinc_n );
+				cplus_n=inc_n;
+				for(j=0;j<VERTEXNUM;j++)
+					incplus[j]=inc[j];
+			}
 			removeDelta();
 		}
 	}
-	//printf("uinc_n:%d\n",uinc_n);
+	printf("cplus_n:%d\n",cplus_n);
+	for(j=0;j<VERTEXNUM;j++)
+	{
+		if(!incplus[j])
+			printf("%d ",j);
+	}
 	return 0;
 }
